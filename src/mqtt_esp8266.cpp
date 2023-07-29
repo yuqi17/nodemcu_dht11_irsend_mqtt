@@ -95,12 +95,12 @@ void setup() {
     }
   }
 
+  // 发布 监听
+  publishDataTicker.attach_ms(20000, publishDataTask); // 温度湿度 20s 发布一次
+
   // 订阅 MQTT 主题
   client.subscribe(mqttSubscribeTopic);
-
-  // 启动定时器
-  publishDataTicker.attach_ms(1000, publishDataTask); 
-  // 这个会关联 callback 也就是芯片端订阅的回调
+  // 这个会关联 callback => 影响IR 发射器的响应时间
   subscribeDataTicker.attach_ms(200, subscribeDataTask);  
 }
 
