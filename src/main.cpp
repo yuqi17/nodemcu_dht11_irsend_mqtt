@@ -37,41 +37,15 @@ const char* mqttSubscribeTopic1 = "weather";
 Ticker publishDataTicker;
 Ticker subscribeDataTicker;
 
-// 定义定时器回调函数
+// 定义定时器回调函数 定义之后就可以把方法写在后面的位置
 void publishDataTask();
 void subscribeDataTask();
+void callback(char* topic, byte* payload, unsigned int length);
 
-void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.println("Message arrived:");
-  Serial.println(topic);
-  if (strcmp(topic, mqttSubscribeTopic) == 0) {
-    String message;
-    for (unsigned int i = 0; i < length; i++) {
-      message += (char)payload[i];
-    }
-    Serial.println(message);
-
-    // 将json 字符串解析为json 对象并取出信息
-    DynamicJsonDocument doc(1024);
-    deserializeJson(doc, message);
-    JsonObject obj = doc.as<JsonObject>();
-    String state = obj["state"];
-
-    Serial.println(state);
-
-    if (state.equals("on")) {
-      coolix.on();
-      coolix.send();
-    } else if (state.equals("off")) {
-      coolix.off();
-      coolix.send();
-    }
-  }
-}
 
 void setup() {
 
-  pinMode(LED_BUILTIN, OUTPUT);
+  // pinMode(LED_BUILTIN, OUTPUT); 不设置默认的低电平会让led 一直亮
   Serial.begin(115200);
   coolix.begin();
 
@@ -103,6 +77,36 @@ void setup() {
   // 这个会关联 callback => 影响IR 发射器的响应时间
   subscribeDataTicker.attach_ms(200, subscribeDataTask);  
 }
+
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.println("Message arrived:");
+  Serial.println(topic);
+  if (strcmp(topic, mqttSubscribeTopic) == 0) {
+    String message;
+    for (unsigned int i = 0; i < length; i++) {
+      message += (char)payload[i];
+    }
+    Serial.println(message);
+
+    // 将json 字符串解析为json 对象并取出信息
+    DynamicJsonDocument doc(1024);
+    deserializeJson(doc, message);
+    JsonObject obj = doc.as<JsonObject>();
+    String state = obj["state"];
+
+    Serial.println(state);
+
+    if (state.equals("on")) {
+      coolix.on();
+      coolix.send();
+    } else if (state.equals("off")) {
+      coolix.off();
+      coolix.send();
+    }
+  }
+}
+
 
 // 定时器回调函数，发布温湿度数据到 MQTT
 void publishDataTask() {
