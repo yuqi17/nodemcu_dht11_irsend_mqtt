@@ -3,14 +3,14 @@
 //D8 GPIO15 会引起连接不上nodemcu
 
 #include <ESP8266WiFi.h>
-#include <PubSubClient.h>
-#include <ArduinoJson.h>
-
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
+
+// 第三方库
+#include <ArduinoJson.h>
+#include <PubSubClient.h>
 #include <WiFiManager.h>
 #include <Ticker.h>
-
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
 #include <ir_Coolix.h>
