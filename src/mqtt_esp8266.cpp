@@ -99,8 +99,9 @@ void setup() {
   client.subscribe(mqttSubscribeTopic);
 
   // 启动定时器
-  publishDataTicker.attach_ms(1000, publishDataTask);   
-  subscribeDataTicker.attach_ms(20000, subscribeDataTask);  
+  publishDataTicker.attach_ms(1000, publishDataTask); 
+  // 这个会关联 callback 也就是芯片端订阅的回调
+  subscribeDataTicker.attach_ms(200, subscribeDataTask);  
 }
 
 // 定时器回调函数，发布温湿度数据到 MQTT

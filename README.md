@@ -1,5 +1,5 @@
 ## 硬件准备
-- Nodemcu v1 esp12e
+- Nodemcu v2 esp12e
 - DHT11 温度湿度模块
 - 38kHZ 红外发射和接收模块
 - 杜邦线若干
