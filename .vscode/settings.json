@@ -26,5 +26,6 @@
     ],
     "files.associations": {
         ".mpyproject.json": "jsonc"
-    }
+    },
+    "cmake.sourceDirectory": "/Users/johnson/Documents/iot-learning/nodemcu_dht11_irsend_mqtt/.pio/libdeps/nodemcuv2/Unity"
 }
