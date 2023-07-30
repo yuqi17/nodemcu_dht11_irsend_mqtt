@@ -85,7 +85,6 @@ void setup()
 
 void callback(char *topic, byte *payload, unsigned int length)
 {
-  Serial.println("Message arrived:");
   Serial.println(topic);
   if (strcmp(topic, switchSubscribeTopic) == 0)
   {
