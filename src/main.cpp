@@ -48,6 +48,13 @@ void setup()
 
   // pinMode(LED_BUILTIN, OUTPUT); 不设置默认的低电平会让led 一直亮
   Serial.begin(115200);
+  Serial.setTimeout(2000);
+  // Wait for serial to initialize.
+  while (!Serial)
+  {
+  }
+  Serial.println("I'm awake, but I'm going into deep sleep mode for 30 seconds");
+
   coolix.begin();
 
   WiFiManager wifiManager;
@@ -72,6 +79,8 @@ void setup()
       Serial.print(client.state());
       delay(2000);
     }
+
+    ESP.deepSleep(30e6);
   }
 
   // 发布 监听
