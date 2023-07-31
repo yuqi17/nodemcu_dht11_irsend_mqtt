@@ -48,12 +48,12 @@ void setup()
 
   // pinMode(LED_BUILTIN, OUTPUT); 不设置默认的低电平会让led 一直亮
   Serial.begin(115200);
-  Serial.setTimeout(2000);
+  // Serial.setTimeout(2000);
   // Wait for serial to initialize.
-  while (!Serial)
-  {
-  }
-  Serial.println("I'm awake, but I'm going into deep sleep mode for 30 seconds");
+  // while (!Serial)
+  // {
+  // }
+  // Serial.println("I'm awake, but I'm going into deep sleep mode for 30 seconds");
 
   coolix.begin();
 
@@ -69,7 +69,12 @@ void setup()
   {
     Serial.println("连接MQTT服务器中...");
     // mqttClient.connect(clientId.c_str(), mqttId, mqttPwd, willTopic, willQoS, willRetain, willMsg)；
-    if (client.connect("完全新的的clientId", mqtt_user, mqtt_password))
+    const char *willTopic = "willDead";
+    const int willQoS = 2;
+    const bool willRetain = true;
+    const char *willMsg = "CLIENT-OFFLINE";
+
+    if (client.connect("完全新的的clientId", mqtt_user, mqtt_password, willTopic, willQoS, willRetain, willMsg))
     {
       Serial.println("连接MQTT成功");
     }
@@ -79,17 +84,18 @@ void setup()
       Serial.print(client.state());
       delay(2000);
     }
-
-    ESP.deepSleep(30e6);
   }
 
   // 发布 监听
-  publishDataTicker.attach_ms(20000, publishDataTask); // 温度湿度 20s 发布一次
+  publishDataTicker.attach_ms(2000, publishDataTask); // 温度湿度 2s 发布一次
 
   // 订阅 MQTT 主题
   client.subscribe(switchSubscribeTopic);
   // 这个会关联 callback => 影响IR 发射器的响应时间
   subscribeDataTicker.attach_ms(200, subscribeDataTask);
+  delay(30);
+  Serial.println("deep sleep for 60 seconds");
+  // ESP.deepSleep(60e6); 行不通
 }
 
 void callback(char *topic, byte *payload, unsigned int length)
@@ -131,6 +137,7 @@ void callback(char *topic, byte *payload, unsigned int length)
 // 定时器回调函数，发布温湿度数据到 MQTT
 void publishDataTask()
 {
+  Serial.println("温度湿度");
   // 读取温湿度数据
   byte temperature = 0;
   byte humidity = 0;
