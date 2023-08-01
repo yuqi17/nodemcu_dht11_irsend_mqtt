@@ -45,9 +45,9 @@ void callback(char *topic, byte *payload, unsigned int length);
 
 void setup()
 {
-
   // pinMode(LED_BUILTIN, OUTPUT); 不设置默认的低电平会让led 一直亮
   Serial.begin(115200);
+
   // Serial.setTimeout(2000);
   // Wait for serial to initialize.
   // while (!Serial)
@@ -93,9 +93,9 @@ void setup()
   client.subscribe(switchSubscribeTopic);
   // 这个会关联 callback => 影响IR 发射器的响应时间
   subscribeDataTicker.attach_ms(200, subscribeDataTask);
-  delay(30);
-  Serial.println("deep sleep for 60 seconds");
-  // ESP.deepSleep(60e6); 行不通
+  // Serial.println("deep sleep for 60 seconds");
+  // ESP.deepSleep(60e6); //行不通
+  // ESP.deepSleep(0);
 }
 
 void callback(char *topic, byte *payload, unsigned int length)
