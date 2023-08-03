@@ -9,8 +9,6 @@
 #include <PubSubClient.h>
 #include <WiFiManager.h>
 #include <Ticker.h>
-
-#include <IRsend.h>
 #include <ir_Coolix.h>
 #include <SimpleDHT.h>
 
