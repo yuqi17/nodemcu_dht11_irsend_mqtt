@@ -3,15 +3,13 @@
 // D8 GPIO15 会引起连接不上nodemcu
 
 #include <ESP8266WiFi.h>
-// #include <DNSServer.h>
-// #include <ESP8266WebServer.h>
 
 // 第三方库
 #include <ArduinoJson.h>
 #include <PubSubClient.h>
 #include <WiFiManager.h>
 #include <Ticker.h>
-// #include <IRremoteESP8266.h>
+
 #include <IRsend.h>
 #include <ir_Coolix.h>
 #include <SimpleDHT.h>
@@ -24,14 +22,15 @@ IRCoolixAC coolix(IR_LED);
 #define DHT_PIN 12 // D6 GPIO12
 SimpleDHT11 dht11(DHT_PIN);
 
-// 网络设置
+// wifi 配网
+WiFiManager wifiManager;
+
+// MQTT设置
 WiFiClient espClient;
 const char *mqtt_server = "broker.emqx.io";
 const int mqtt_port = 1883;
 const char *mqtt_user = "jonas";
 const char *mqtt_password = "abc123";
-
-// MQTT设置
 PubSubClient client(espClient);
 const char *switchSubscribeTopic = "switch";
 const char *weatherPublishTopic = "weather";
@@ -52,7 +51,6 @@ void setup()
   Serial.begin(115200);
   coolix.begin();
 
-  WiFiManager wifiManager;
   // wifiManager.resetSettings();  //清除上一次保存的WIFI账号和密码
   wifiManager.autoConnect("esp8266-auto");
 
