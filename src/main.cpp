@@ -128,7 +128,6 @@ void callback(char *topic, byte *payload, unsigned int length)
 // 定时器回调函数，发布温湿度数据到 MQTT
 void publishDataTask()
 {
-
   // 读取温湿度数据
   byte temperature = 0;
   byte humidity = 0;
@@ -152,8 +151,6 @@ void publishDataTask()
   serializeJson(data, sendJson);
   // 发布温湿度数据到 MQTT
   client.publish(weatherPublishTopic, sendJson, false);
-
-  sendCallBack(sendJson);
 }
 
 // 定时器回调函数，检查 MQTT 订阅的消息
