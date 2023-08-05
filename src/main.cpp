@@ -32,7 +32,6 @@ const char *switchSubscribeTopic = "switch";
 const char *weatherPublishTopic = "weather";
 const char *switchPublishTopic = "switch/feedback";
 
-
 void callback(char *topic, byte *payload, unsigned int length)
 {
   Serial.println(topic);
@@ -98,6 +97,29 @@ void publishDataTask()
   client.publish(weatherPublishTopic, sendJson, false);
 }
 
+void connectMQTTServer()
+{
+  // 根据ESP8266的MAC地址生成客户端ID（避免与其他设备产生冲突）
+  String clientId = "你的设备clientId";
+  const char *willTopic = "willDead";
+  const int willQoS = 2;
+  const bool willRetain = true;
+  const char *willMsg = "CLIENT-OFFLINE";
+
+  // 连接MQTT服务器
+  if (client.connect(clientId.c_str(), mqtt_user, mqtt_password, willTopic, willQoS, willRetain, willMsg))
+  {
+    Serial.println("MQTT 连接成功.");
+    client.subscribe(switchSubscribeTopic);
+  }
+  else
+  {
+    Serial.println("MQTT 连接失败,状态码: ");
+    Serial.println(client.state());
+    delay(2000);
+  }
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -108,32 +130,22 @@ void setup()
 
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
-  // client.setKeepAlive(20); // 默认是15s 心跳
+  client.setKeepAlive(5); // 默认是15s 心跳
 
-  while (!client.connected())
+  connectMQTTServer();
+  delay(2000);
+  if (client.connected())
   {
-    Serial.println("连接MQTT服务器中...");
-    const char *willTopic = "willDead";
-    const int willQoS = 2;
-    const bool willRetain = true;
-    const char *willMsg = "CLIENT-OFFLINE";
-
-    if (client.connect("完全新的的clientId", mqtt_user, mqtt_password, willTopic, willQoS, willRetain, willMsg))
-    {
-      Serial.println("连接MQTT成功");
-        publishDataTask();
-        client.loop();
-    }
-    else
-    {
-      Serial.print("连接失败： ");
-      Serial.print(client.state());
-      delay(2000);
-    }
+    publishDataTask();
+    client.loop();
   }
-  client.subscribe(switchSubscribeTopic);
-  Serial.print("准备60s的休眠");
-  ESP.deepSleep(60e6); 
+  else
+  {
+    Serial.println("重新连接MQTT服务器中...");
+    connectMQTTServer();
+  }
+  Serial.println("准备120s的休眠");
+  ESP.deepSleep(120e6);
 }
 
 void loop()
