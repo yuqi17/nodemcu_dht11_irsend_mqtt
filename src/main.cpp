@@ -130,24 +130,24 @@ void setup()
 
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
-  client.setKeepAlive(5); // 默认是15s 心跳
+  client.setKeepAlive(50); // 默认是15s 心跳
 
-  connectMQTTServer();
-  delay(2000);
-  if (client.connected())
+  while (!client.connected())
   {
-    publishDataTask();
-    client.loop();
-  }
-  else
-  {
-    Serial.println("重新连接MQTT服务器中...");
     connectMQTTServer();
   }
+
+  for(int i = 0;i < 10; i++){
+    publishDataTask();
+    client.loop();    
+    delay(3000);
+  }
+
   Serial.println("准备120s的休眠");
   ESP.deepSleep(120e6);
 }
 
 void loop()
 {
+  Serial.println("loop...");
 }
