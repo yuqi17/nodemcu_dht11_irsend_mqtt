@@ -7,7 +7,6 @@
 #include <ArduinoJson.h>
 #include <PubSubClient.h>
 #include <WiFiManager.h>
-#include <Ticker.h>
 #include <ir_Coolix.h>
 #include <SimpleDHT.h>
 
@@ -33,56 +32,6 @@ const char *switchSubscribeTopic = "switch";
 const char *weatherPublishTopic = "weather";
 const char *switchPublishTopic = "switch/feedback";
 
-// 定时器回调设置
-Ticker publishDataTicker;
-Ticker subscribeDataTicker;
-
-// 定义定时器回调函数 定义之后就可以把方法写在后面的位置
-void publishDataTask();
-void subscribeDataTask();
-void callback(char *topic, byte *payload, unsigned int length);
-
-void setup()
-{
-  // pinMode(LED_BUILTIN, OUTPUT); 不设置默认的低电平会让led 一直亮
-  Serial.begin(115200);
-  coolix.begin();
-
-  // wifiManager.resetSettings();  //清除上一次保存的WIFI账号和密码
-  wifiManager.autoConnect("esp8266-auto");
-
-  client.setServer(mqtt_server, mqtt_port);
-  client.setCallback(callback);
-  // client.setKeepAlive(20); // 默认是15s 心跳
-
-  while (!client.connected())
-  {
-    Serial.println("连接MQTT服务器中...");
-    const char *willTopic = "willDead";
-    const int willQoS = 2;
-    const bool willRetain = true;
-    const char *willMsg = "CLIENT-OFFLINE";
-
-    if (client.connect("完全新的的clientId", mqtt_user, mqtt_password, willTopic, willQoS, willRetain, willMsg))
-    {
-      Serial.println("连接MQTT成功");
-    }
-    else
-    {
-      Serial.print("连接失败： ");
-      Serial.print(client.state());
-      delay(2000);
-    }
-  }
-
-  // 发布 监听
-  publishDataTicker.attach_ms(5000, publishDataTask); // 温度湿度 2s 发布一次
-
-  // 订阅 MQTT 主题
-  client.subscribe(switchSubscribeTopic);
-  // 这个会关联 callback => 影响IR 发射器的响应时间
-  subscribeDataTicker.attach_ms(200, subscribeDataTask);
-}
 
 void callback(char *topic, byte *payload, unsigned int length)
 {
@@ -123,6 +72,7 @@ void callback(char *topic, byte *payload, unsigned int length)
 // 定时器回调函数，发布温湿度数据到 MQTT
 void publishDataTask()
 {
+  Serial.println("准备发布温度湿度...");
   // 读取温湿度数据
   byte temperature = 0;
   byte humidity = 0;
@@ -148,11 +98,42 @@ void publishDataTask()
   client.publish(weatherPublishTopic, sendJson, false);
 }
 
-// 定时器回调函数，检查 MQTT 订阅的消息
-void subscribeDataTask()
+void setup()
 {
-  // 检查 MQTT 订阅的消息
-  client.loop();
+  Serial.begin(115200);
+  coolix.begin();
+
+  // wifiManager.resetSettings();  //清除上一次保存的WIFI账号和密码
+  wifiManager.autoConnect("esp8266-auto");
+
+  client.setServer(mqtt_server, mqtt_port);
+  client.setCallback(callback);
+  // client.setKeepAlive(20); // 默认是15s 心跳
+
+  while (!client.connected())
+  {
+    Serial.println("连接MQTT服务器中...");
+    const char *willTopic = "willDead";
+    const int willQoS = 2;
+    const bool willRetain = true;
+    const char *willMsg = "CLIENT-OFFLINE";
+
+    if (client.connect("完全新的的clientId", mqtt_user, mqtt_password, willTopic, willQoS, willRetain, willMsg))
+    {
+      Serial.println("连接MQTT成功");
+        publishDataTask();
+        client.loop();
+    }
+    else
+    {
+      Serial.print("连接失败： ");
+      Serial.print(client.state());
+      delay(2000);
+    }
+  }
+  client.subscribe(switchSubscribeTopic);
+  Serial.print("准备60s的休眠");
+  ESP.deepSleep(60e6); 
 }
 
 void loop()
